@@ -2,7 +2,7 @@
 
 using DBus;
 
-namespace Mono.BlueZ.Console
+namespace Mono.BlueZ.Console.Test
 {
     public class TestService : Service
     {

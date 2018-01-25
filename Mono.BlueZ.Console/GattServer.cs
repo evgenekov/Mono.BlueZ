@@ -48,18 +48,16 @@ namespace Mono.BlueZ.Console
                 }
 
                 var application = new Application(system);
-                application.AddService(new TestService(system, 0));
+                application.AddService(new Test.TestService(system, 0));
 
                 appObjectPath = application.GetPath();
                 var options = new Dictionary<string, object>();
                 gattManager.RegisterApplication(appObjectPath, options);
 
-                while(true)
+                while (true)
                 {
                     // Gatt server is running. Do nothing here.
                 }
-
-                //Thread.Sleep(30000);
             }
             catch (Exception exception)
             {

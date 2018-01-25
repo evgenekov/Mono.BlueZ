@@ -40,9 +40,13 @@
     <Compile Include="PebbleBootstrap.cs" />
     <Compile Include="BlendMicroBootstrap.cs" />
     <Compile Include="GattServer.cs" />
-    <Compile Include="TestCharacteristic.cs" />
-    <Compile Include="TestDescriptor.cs" />
-    <Compile Include="TestService.cs" />
+    <Compile Include="GattClient.cs" />
+    <Compile Include="GattTestPerformance.cs" />
+    <Compile Include="TestPerformance\TestPerformanceService.cs" />
+    <Compile Include="TestPerformance\TestPerformanceCharacteristic.cs" />
+    <Compile Include="Test\TestCharacteristic.cs" />
+    <Compile Include="Test\TestDescriptor.cs" />
+    <Compile Include="Test\TestService.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -58,5 +62,9 @@
       <Project>{09A0200F-F3AF-4BD6-9EC4-E7D80D273E4C}</Project>
       <Name>dbus-sharp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestPerformance\" />
+    <Folder Include="Test\" />
   </ItemGroup>
 </Project>

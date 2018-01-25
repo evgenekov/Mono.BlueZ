@@ -1,7 +1,7 @@
 ﻿using System;
 using DBus;
 
-namespace Mono.BlueZ.Console
+namespace Mono.BlueZ.Console.Test
 {
     public class TestDescriptor : Descriptor
     {

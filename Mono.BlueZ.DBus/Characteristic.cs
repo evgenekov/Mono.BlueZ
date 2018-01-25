@@ -9,7 +9,7 @@ namespace Mono.BlueZ
 {
     public abstract class Characteristic : GattCharacteristic1, Properties
     {
-        private const string gattCharacteristic = "org.bluez.GattCharacteristic1";
+        protected const string gattCharacteristic = "org.bluez.GattCharacteristic1";
         private readonly Bus bus;
         private readonly string path;
         private List<Descriptor> descriptors;
@@ -32,7 +32,7 @@ namespace Mono.BlueZ
 
         public ObjectPath Service { get; private set; }
 
-        public byte[] Value { get; protected set; }
+        public virtual byte[] Value { get; protected set; }
 
         public bool WriteAcquired 
         {
@@ -86,20 +86,20 @@ namespace Mono.BlueZ
             throw new NotSupportedException();
         }
 
-        public void StartNotify()
+        public virtual void StartNotify()
         {
             Console.WriteLine("Characteristic StartNotify called, returning error");
             throw new NotSupportedException();
         }
 
-        public void StopNotify()
+        public virtual void StopNotify()
         {
             Console.WriteLine("Characteristic StopNotify called, returning error");
             throw new NotSupportedException();
         }
 
         [return: Argument("value")]
-        public object Get(string @interface, string propname)
+        public virtual object Get(string @interface, string propname)
         {
             Console.WriteLine("Characteristic Get called, returning error");
             throw new NotSupportedException();
@@ -148,6 +148,14 @@ namespace Mono.BlueZ
             };
 
             return dict;
+        }
+
+        protected virtual void OnPropertiesChanged(string @interface, IDictionary<string, object> changed, string[] invalidated)
+        {
+            if (PropertiesChanged != null)
+            {
+                PropertiesChanged(@interface, changed, invalidated);
+            }
         }
     }
 }
