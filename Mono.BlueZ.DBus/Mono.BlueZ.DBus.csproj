@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -37,9 +36,9 @@
     <Compile Include="SimpleObjectManager.cs" />
     <Compile Include="AgentManager1.cs" />
     <Compile Include="Alert1.cs" />
+    <Compile Include="Adapter1.cs" />
     <Compile Include="HealthManager1.cs" />
     <Compile Include="ProfileManager1.cs" />
-    <Compile Include="Adapter1.cs" />
     <Compile Include="CyclingSpeedManager1.cs" />
     <Compile Include="HeartRateManager1.cs" />
     <Compile Include="Media1.cs" />
@@ -62,6 +61,7 @@
     <Compile Include="Characteristic.cs" />
     <Compile Include="Descriptor.cs" />
     <Compile Include="Service.cs" />
+    <Compile Include="Advertisement.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

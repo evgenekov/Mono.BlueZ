@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DBus;
 
@@ -9,7 +8,9 @@ namespace Mono.BlueZ.DBus
 	[Interface("org.bluez.LEAdvertisingManager1")]
 	public interface LEAdvertisingManager1
 	{
-		void RegisterAdvertisement(ObjectPath advertisement,IDictionary<string,object> options);
-		void UnregisterAdvertisement(ObjectPath service);
+		void RegisterAdvertisement(ObjectPath advertisement, IDictionary<string, object> options);
+        void UnregisterAdvertisement(ObjectPath advertisement);
+        byte ActiveInstances { get; set; }
+        string[] SupportedIncludes { get; set; }
 	}
 }

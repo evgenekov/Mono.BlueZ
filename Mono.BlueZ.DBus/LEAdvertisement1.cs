@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DBus;
 
 namespace Mono.BlueZ.DBus
@@ -10,14 +9,15 @@ namespace Mono.BlueZ.DBus
 	{
 		void Release();
 
-		string Type{get;set;}
-		IList<string> UUIDs{get;set;}
-		IDictionary<string,object> ManufacturerData{get;set;}
-		IList<string> SolicitUUIDs{get;set;}
-		IDictionary<string,object> ServiceData{get;set;}
-		bool IncludeTxPower{get;set;}
+        string Type { get; set; }
+        string[] ServiceUUIDs { get; set; }
+        IDictionary<string, object> ManufacturerData { get; set; }
+        string[] SolicitUUIDs { get; set; }
+        IDictionary<string, object> ServiceData { get; set; }
+        string[] Includes { get; set; }
+        string LocalName { get; set; }
+        int Appearance { get; set; }
+        uint Duration { get; set; }
+        uint Timeout { get; set; }
 	}
 }
-
-
-

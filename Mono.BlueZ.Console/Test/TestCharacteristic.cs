@@ -14,10 +14,11 @@ namespace Mono.BlueZ.Console.Test
         private List<string> invalidated_properties;
 
         private byte[] data;
-        private int dataSize = 50;
+        private const int dataSize = 20;
         private Random randomData = new Random();
         private bool notifying;
-        private int timeNotifyingDelay = 200;
+        private const int timeNotifyingDelay = 200;
+        private int byteArrayIndex = 0;
 
         private System.Threading.Timer timer;
 
@@ -82,8 +83,33 @@ namespace Mono.BlueZ.Console.Test
 
         private void UpdateValue(object stateInfo)
         {
-            randomData.NextBytes(Value);
+            //randomData.NextBytes(Value);
+            UpdateIncrementValue();
             AddPropertyChange(gattCharacteristic, new string[] { nameof(Value) });
+        }
+
+        private void UpdateIncrementValue()
+        {
+            if (data[byteArrayIndex] == 0xFF)
+            {
+                if (byteArrayIndex == (data.Length - 1))
+                {
+                    ResetDataArray();
+                    byteArrayIndex = 0;
+                }
+
+                byteArrayIndex++;
+            }
+
+            data[byteArrayIndex] += 1;
+        }
+
+        private void ResetDataArray()
+        {
+            for (int index = 0; index < dataSize; index++)
+            {
+                data[index] = 0x00;
+            }
         }
 
         public override byte[] Value

@@ -7,22 +7,24 @@ namespace Mono.BlueZ.DBus
 	[Interface("org.bluez.Adapter1")]
 	public interface Adapter1
 	{
-		void RemoveDevice(ObjectPath device);
-		void SetDiscoveryFilter (IDictionary<string,object> properties);
 		void StartDiscovery();
 		void StopDiscovery();
+        void RemoveDevice(ObjectPath device);
+        void SetDiscoveryFilter(IDictionary<string, object> properties);
+        string[] GetDiscoveryFilters();
 
-		IList<string> UUIDs{ get; }
-		bool Discoverable{get;set;}
-		bool Discovering{get;}
-		bool Pairable{get;set;}
-		bool Powered{get;set;}
-		string Address{ get; }
-		string Alias{get;set;}
-		string Modalias{ get; }
-		string Name{get;}
-		uint Class{ get; }
-		uint DiscoverableTimeout{get;set;}
-		uint PairableTimeout{ get; set; }
+		string Address { get; }
+        string AddressType { get; }
+        string Name { get; }
+        string Alias { get; set; }
+        uint Class { get; }
+        bool Powered { get; set; }
+        bool Discoverable { get; set; }
+        bool Pairable { get; set; }
+        uint PairableTimeout { get; set; }
+        uint DiscoverableTimeout { get; set; }
+        bool Discovering { get; }
+        IList<string> UUIDs { get; }
+		string Modalias { get; }
 	}
 }

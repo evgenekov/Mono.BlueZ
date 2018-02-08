@@ -20,13 +20,13 @@ namespace Mono.BlueZ.Console
             StartMessageLoopDBus();
 
             GattManager1 gattManager = null;
-            ObjectPath appObjectPath = null;
-
+            ObjectPath appObjectPath;
+            appObjectPath = null;
             try
             {
                 System.Console.WriteLine("Fetching objects");
 
-                // 2. Find adapter
+                // 1. Find adapter
                 var adapterFound = FindAdapter();
 
                 if (adapterFound == null)
@@ -47,17 +47,19 @@ namespace Mono.BlueZ.Console
                     System.Console.WriteLine("Found Gatt manager.");
                 }
 
-                var application = new Application(system);
-                application.AddService(new Test.TestService(system, 0));
+                // 2. Start advertising
+                StartAdvertising(adapterFound);
+                // 3. Stop advertising when adapter is connected
 
-                appObjectPath = application.GetPath();
-                var options = new Dictionary<string, object>();
-                gattManager.RegisterApplication(appObjectPath, options);
+                // 4. Start application
+                //StartApplication(gattManager, appObjectPath);
 
                 while (true)
                 {
                     // Gatt server is running. Do nothing here.
                 }
+
+                //advertisementManager.UnregisterAdvertisement(advertisement.GetPath());
             }
             catch (Exception exception)
             {
@@ -65,8 +67,30 @@ namespace Mono.BlueZ.Console
             }
             finally
             {
-                gattManager.UnregisterApplication(appObjectPath);
+                //gattManager.UnregisterApplication(appObjectPath);
+                //advertisementManager.UnregisterAdvertisement(());
             }
+        }
+
+        private void StartAdvertising(ObjectPath adapterFound)
+        {
+            var advertisementManager = GetObject<LEAdvertisingManager1>(SERVICE, adapterFound);
+            var adapter_properties = GetObject<Adapter1>(SERVICE, adapterFound);
+            adapter_properties.Powered = true;
+
+            var advertisement = new Advertisement(system, 0, "peripheral");
+            var options = new Dictionary<string, object>();
+            advertisementManager.RegisterAdvertisement(advertisement.GetPath(), options);
+        }
+
+        private void StartApplication(GattManager1 gattManager, ObjectPath appObjectPath)
+        {
+            var application = new Application(system);
+            application.AddService(new Test.TestService(system, 0));
+
+            appObjectPath = application.GetPath();
+            var options = new Dictionary<string, object>();
+            gattManager.RegisterApplication(appObjectPath, options);
         }
 
         private void StartMessageLoopDBus()
