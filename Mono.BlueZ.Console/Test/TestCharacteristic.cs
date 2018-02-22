@@ -17,10 +17,10 @@ namespace Mono.BlueZ.Console.Test
         private const int dataSize = 20;
         private Random randomData = new Random();
         private bool notifying;
-        private const int timeNotifyingDelay = 200;
-        private int byteArrayIndex = 0;
+        private int byteArrayIndex;
 
-        private System.Threading.Timer timer;
+
+        private System.Threading.Thread updateNotifyThread;
 
         public TestCharacteristic(Bus bus, int index, ObjectPath service) : base(bus, index, testCharacteristicUUID, flags, service)
         {
@@ -33,13 +33,11 @@ namespace Mono.BlueZ.Console.Test
 
         public override byte[] ReadValue(IDictionary<string, object> options)
         {
-            System.Console.WriteLine("Characteristic ReadValue: " + BitConverter.ToString(Value));
             return Value;
         }
 
         public override void WriteValue(byte[] value, IDictionary<string, object> options)
         {
-            System.Console.WriteLine("Characteristic WriteValue: " + BitConverter.ToString(value));
             Value = value;
         }
 
@@ -71,21 +69,24 @@ namespace Mono.BlueZ.Console.Test
         {
             if (!notifying)
             {
-                if (timer != null)
+                if (updateNotifyThread != null && updateNotifyThread.IsAlive)
                 {
-                    timer.Dispose();
+                    updateNotifyThread.Abort();
                 }
                 return;
             }
 
-            timer = new System.Threading.Timer(UpdateValue, null, 0, timeNotifyingDelay);
+            updateNotifyThread = new System.Threading.Thread(UpdateValue);
+            updateNotifyThread.Start();
         }
 
-        private void UpdateValue(object stateInfo)
+        private void UpdateValue()
         {
-            //randomData.NextBytes(Value);
-            UpdateIncrementValue();
-            AddPropertyChange(gattCharacteristic, new string[] { nameof(Value) });
+            while(true)
+            { 
+                UpdateIncrementValue();
+                AddPropertyChange(gattCharacteristic, new string[] { nameof(Value) });
+            }
         }
 
         private void UpdateIncrementValue()
@@ -131,7 +132,6 @@ namespace Mono.BlueZ.Console.Test
                 switch (propname)
                 {
                     case nameof(Value):
-                        System.Console.WriteLine("Get Update Value: " + BitConverter.ToString(Value));
                         var newValue= new byte[Value.Length];
                         Array.Copy(Value, newValue, Value.Length);
                         return newValue;
