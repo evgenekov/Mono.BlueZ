@@ -6,6 +6,7 @@ using org.freedesktop.DBus;
 
 namespace Mono.BlueZ.DBus
 {
+    [Interface("org.bluez.LEAdvertisement1")]
     public class Advertisement : LEAdvertisement1, Properties
     {
         protected const string leAdvertisement1 = "org.bluez.LEAdvertisement1";
@@ -22,18 +23,18 @@ namespace Mono.BlueZ.DBus
 
             LocalName = "TestAdvertisement";
 
-            ServiceUUIDs = new string[] { "180D", "180F" };
+            ServiceUUIDs = new string[] { };
 
             ManufacturerData = new Dictionary<string, object>();
-            ManufacturerData.Add("0xFFFF", new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04 });
 
             ServiceData = new Dictionary<string, object>();
-            ServiceData.Add("9999", new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04 });
+
+            SolicitUUIDs = new string[] { };
 
             includes = new List<string>();
-            includes.Add("local-name");
-            includes.Add("tx-power");
             Includes = includes.ToArray();
+
+            Timeout = 60;
 
             bus.Register(new ObjectPath(path), this);
         }
@@ -44,9 +45,9 @@ namespace Mono.BlueZ.DBus
         public string[] SolicitUUIDs { get; set; }
         public IDictionary<string, object> ServiceData { get; set; }
         public string[] Includes { get; set; }
-        public int Appearance { get; set; }
-        public uint Duration { get; set; }
-        public uint Timeout { get; set; }
+        public ushort Appearance { get; set; }
+        public ushort Duration { get; set; }
+        public ushort Timeout { get; set; }
         public string LocalName { get; set; }
 
         public ObjectPath GetPath()
@@ -59,7 +60,6 @@ namespace Mono.BlueZ.DBus
             Console.WriteLine("Advertisement release!");
         }
 
-        [return: Argument("props")]
         public IDictionary<string, object> GetAll(string @interface)
         {
             if (@interface != leAdvertisement1)

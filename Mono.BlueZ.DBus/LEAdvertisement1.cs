@@ -16,8 +16,8 @@ namespace Mono.BlueZ.DBus
         IDictionary<string, object> ServiceData { get; set; }
         string[] Includes { get; set; }
         string LocalName { get; set; }
-        int Appearance { get; set; }
-        uint Duration { get; set; }
-        uint Timeout { get; set; }
+        ushort Appearance { get; set; }
+        ushort Duration { get; set; }
+        ushort Timeout { get; set; }
 	}
 }
