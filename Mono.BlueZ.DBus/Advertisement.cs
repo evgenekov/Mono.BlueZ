@@ -6,7 +6,6 @@ using org.freedesktop.DBus;
 
 namespace Mono.BlueZ.DBus
 {
-    [Interface("org.bluez.LEAdvertisement1")]
     public class Advertisement : LEAdvertisement1, Properties
     {
         protected const string leAdvertisement1 = "org.bluez.LEAdvertisement1";
