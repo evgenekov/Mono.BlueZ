@@ -38,13 +38,13 @@ namespace Mono.BlueZ.Console
 		public void Run()
 		{
 
-			string serviceUUID="713d0000-503e-4c75-ba94-3148f18d941e";
-			string charVendorName = "713D0001-503E-4C75-BA94-3148F18D941E";
-			string charRead = "713D0002-503E-4C75-BA94-3148F18D941E";//rx
-			string charWrite = "713D0003-503E-4C75-BA94-3148F18D941E";//tx
-			string charAck = "713D0004-503E-4C75-BA94-3148F18D941E";
-			string charVersion = "713D0005-503E-4C75-BA94-3148F18D941E";
-			string clientCharacteristic = "00002902-0000-1000-8000-00805f9b34fb";
+			//string serviceUUID="713d0000-503e-4c75-ba94-3148f18d941e";
+			//string charVendorName = "713D0001-503E-4C75-BA94-3148F18D941E";
+			//string charRead = "713D0002-503E-4C75-BA94-3148F18D941E";//rx
+			//string charWrite = "713D0003-503E-4C75-BA94-3148F18D941E";//tx
+			//string charAck = "713D0004-503E-4C75-BA94-3148F18D941E";
+			//string charVersion = "713D0005-503E-4C75-BA94-3148F18D941E";
+			//string clientCharacteristic = "00002902-0000-1000-8000-00805f9b34fb";
 
 			System.Console.WriteLine ("Starting Blend Micro Bootstrap");
 			string Service = "org.bluez";

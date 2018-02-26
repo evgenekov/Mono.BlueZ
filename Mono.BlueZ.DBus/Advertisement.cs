@@ -2,18 +2,15 @@
 using System.Collections.Generic;
 
 using DBus;
-using org.freedesktop.DBus;
 
 namespace Mono.BlueZ.DBus
 {
-    public class Advertisement : LEAdvertisement1, Properties
+    public class Advertisement : LEAdvertisement1
     {
-        protected const string leAdvertisement1 = "org.bluez.LEAdvertisement1";
+        private const string leAdvertisement1 = "org.bluez.LEAdvertisement1";
         private string PATH_BASE = "/org/bluez/example/advertisement";
         private readonly string path;
         private List<string> includes;
-
-        public event PropertiesChangedHandler PropertiesChanged;
 
         public Advertisement(Bus bus, int index, string advertisingType)
         {
@@ -36,6 +33,7 @@ namespace Mono.BlueZ.DBus
             Timeout = 60;
 
             bus.Register(new ObjectPath(path), this);
+            Console.WriteLine("Advertisement registred.");
         }
 
         public string Type { get; set; }
@@ -56,7 +54,7 @@ namespace Mono.BlueZ.DBus
 
         public void Release()
         {
-            Console.WriteLine("Advertisement release!");
+            Console.WriteLine("Advertisement released.");
         }
 
         public IDictionary<string, object> GetAll(string @interface)
@@ -80,17 +78,6 @@ namespace Mono.BlueZ.DBus
             };
 
             return dict;
-        }
-
-        [return: Argument("value")]
-        public object Get(string @interface, string propname)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Set(string @interface, string propname, object value)
-        {
-            throw new NotImplementedException();
         }
     }
 }
