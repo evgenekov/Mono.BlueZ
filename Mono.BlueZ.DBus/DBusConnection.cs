@@ -5,18 +5,17 @@ using DBus;
 
 namespace Mono.BlueZ.DBus
 {
-	public class DBusConnection:IDisposable
+	public class DBusConnection: IDisposable
 	{
 		private Bus _system;
-		public Exception _startupException{ get; private set; }
 		private ManualResetEvent _started = new ManualResetEvent(false);
-		private Thread _dbusLoop;
-		private bool _run=false;
-		private bool _isStarted=false;
+        private Thread _dbusLoop;
+		private bool _run = false;
+		private bool _isStarted = false;
+        private Exception _startupException;
 
-		public DBusConnection ()
+		public DBusConnection()
 		{
-			Startup ();
 		}
 
 		public Bus System
@@ -34,7 +33,7 @@ namespace Mono.BlueZ.DBus
 			}
 		}
 
-		private void Startup()
+		public void Startup()
 		{
 			// Run a message loop for DBus on a new thread.
 			_run = true;
@@ -45,7 +44,7 @@ namespace Mono.BlueZ.DBus
 			_started.Close();
 			if (_startupException != null) 
 			{
-				throw _startupException;
+                throw _startupException;
 			}
 			else 
 			{
@@ -57,7 +56,7 @@ namespace Mono.BlueZ.DBus
 		{
 			try
 			{
-				_system=Bus.System;
+				_system = Bus.System;
 			} 
 			catch (Exception ex) 
 			{
@@ -86,7 +85,7 @@ namespace Mono.BlueZ.DBus
 			{
 				try 
 				{
-					_dbusLoop.Abort ();
+					_dbusLoop.Abort();
 				} 
 				catch 
 				{
@@ -96,10 +95,18 @@ namespace Mono.BlueZ.DBus
 
 		public void Dispose()
 		{
-			if (_isStarted) {
+			if (_isStarted) 
+            {
 				Shutdown ();
 			}
 		}
-	}
-}
 
+        public void Wait()
+        {
+            if (_dbusLoop.IsAlive)
+            {
+                _dbusLoop.Join();    
+            }
+        }
+    }
+}

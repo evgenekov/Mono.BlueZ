@@ -82,10 +82,11 @@ namespace Mono.BlueZ.Console.Test
 
         private void UpdateValue()
         {
-            while(true)
+            while (true)
             { 
                 UpdateIncrementValue();
                 AddPropertyChange(gattCharacteristic, new string[] { nameof(Value) });
+                System.Threading.Thread.Sleep(100);
             }
         }
 

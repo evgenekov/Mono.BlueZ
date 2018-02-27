@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using DBus;
 using Mono.BlueZ.DBus;
@@ -10,58 +9,56 @@ namespace Mono.BlueZ.Console
 {
     public class GattServer
     {
-        private Bus system;
-        public Exception _startupException { get; private set; }
         private const string SERVICE = "org.bluez";
-        private ObjectPath connectedDevicePath;
-        private ObjectPath appObjectPath;
-        private ObjectPath advertisingManagerPath;
-        private ObjectPath adapterFound;
+        private ObjectPath applicationPath;
+        private ObjectPath advertisementPath;
+        private ObjectPath adapterFoundPath;
         private LEAdvertisingManager1 advertisementManager;
+        private LEAdvertisement1 advertisement;
+        private DBusConnection busConnection;
+        private string deviceConnected;
+
+        public GattServer()
+        {
+            busConnection = new DBusConnection();
+        }
 
         public void Run()
         {
+            try
+            {
+                busConnection.Startup();
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine(e);
+                return;
+            }
+
             GattManager1 gattManager = null;
 
             try
             {
                 System.Console.WriteLine("Fetching objects");
+                // Find adapter
+                adapterFoundPath = FindAdapter();
 
-                // 1. Find adapter
-                var getBusSystemTask = Task.Run(() => system = Bus.System);
-                    
-                var mainTask = getBusSystemTask.ContinueWith((antecedent) => 
+                if (adapterFoundPath == null)
                 {
-                    if (antecedent.IsFaulted)
-                    {
-                        System.Console.WriteLine(antecedent.Exception);
-                        return;
-                    }
+                    System.Console.WriteLine("Couldn't find adapter that supports LE");
+                    return;
+                }
 
-                    adapterFound = FindAdapter();
+                gattManager = GetObject<GattManager1>(SERVICE, adapterFoundPath);
+                advertisementManager = GetObject<LEAdvertisingManager1>(SERVICE, adapterFoundPath);
+                                  
+                // Start advertising
+                StartAdvertising();
 
-                    if (adapterFound == null)
-                    {
-                        System.Console.WriteLine("Couldn't find adapter that supports LE");
-                        return;
-                    }
+                // Start application
+                StartApplication(gattManager);
 
-                    gattManager = GetObject<GattManager1>(SERVICE, adapterFound);
-                    advertisementManager = GetObject<LEAdvertisingManager1>(SERVICE, adapterFound);
-                                      
-                    // 2. Start advertising
-                    StartAdvertising();
-
-                    // 4. Start application
-                    StartApplication(gattManager);
-
-                    while (true)
-                    {
-                        system.Iterate();
-                    }
-                });
-
-                mainTask.Wait();
+                busConnection.Wait();
             }
             catch (Exception exception)
             {
@@ -71,7 +68,7 @@ namespace Mono.BlueZ.Console
             {
                 if (gattManager != null)
                 {
-                    gattManager.UnregisterApplication(appObjectPath);    
+                    gattManager.UnregisterApplication(applicationPath);    
                 }
 
                 StopAdvertising();
@@ -80,14 +77,14 @@ namespace Mono.BlueZ.Console
 
         private void StartAdvertising()
         {
-            var adapter_properties = GetObject<Adapter1>(SERVICE, adapterFound);
+            var adapter_properties = GetObject<Adapter1>(SERVICE, adapterFoundPath);
             adapter_properties.Powered = true;
 
-            var advertisement = new Advertisement(system, 0, "peripheral");
-            advertisingManagerPath = advertisement.GetPath();
+            advertisement = new Advertisement(busConnection.System, 0, "peripheral");
+            advertisementPath = (advertisement as Advertisement).GetPath();
             var options = new Dictionary<string, object>();
 
-            advertisementManager.RegisterAdvertisement(advertisingManagerPath, options);
+            advertisementManager.RegisterAdvertisement(advertisementPath, options);
         }
 
         private void StartApplication(GattManager1 gattManager)
@@ -98,19 +95,26 @@ namespace Mono.BlueZ.Console
                 return;
             }
            
-            var application = new Application(system);
-            application.AddService(new Test.TestService(system, 0));
+            var application = new Application(busConnection.System);
+            application.AddService(new Test.TestService(busConnection.System, 0));
 
-            appObjectPath = application.GetPath();
+            applicationPath = application.GetPath();
             var options = new Dictionary<string, object>();
-            gattManager.RegisterApplication(appObjectPath, options);
+            gattManager.RegisterApplication(applicationPath, options);
         }
 
         private void StopAdvertising()
         {
-            if (advertisementManager != null)
+            if (advertisement != null)
             {
-                advertisementManager.UnregisterAdvertisement(advertisingManagerPath);    
+                advertisement.Release();
+            }
+
+            if (advertisementPath != null)
+            {
+                advertisementManager.UnregisterAdvertisement(advertisementPath);
+                advertisementPath = null;
+                advertisement = null;
             }
         }
 
@@ -128,16 +132,33 @@ namespace Mono.BlueZ.Console
                 //register these events so we can tell when things are added/removed (eg: discovery)
                 manager.InterfacesAdded += (p, i) =>
                 {
-                    connectedDevicePath = p;
+                    if (string.IsNullOrEmpty(deviceConnected))
+                    {
+                        if (p.ToString().Contains(adapterFoundPath.ToString()))
+                        {
+                            deviceConnected = p.ToString();
 
-                    DeviceConnected();
+                            StopAdvertising();
+                            System.Console.WriteLine("Device connected: " + deviceConnected);
+                        }
+                    }
 
                     System.Console.WriteLine(p + " Discovered");
                 };
                 manager.InterfacesRemoved += (p, i) =>
                 {
+                    if (!string.IsNullOrEmpty(deviceConnected))
+                    {
+                        if (deviceConnected.Equals(p.ToString()))
+                        {
+                            deviceConnected = string.Empty;
+                            StopAdvertising();
+                            StartAdvertising();
+                            System.Console.WriteLine("Device disconnected");
+                        }
+                    }
+
                     System.Console.WriteLine(p + " Lost");
-                    DeviceDisconnected(p);
                 };
 
                 System.Console.WriteLine("Done");
@@ -150,6 +171,7 @@ namespace Mono.BlueZ.Console
         {
             var manager = GetCopyObjectManager();
             //get the bluetooth object tree
+            System.Console.WriteLine("GetManagedObjects");
             var managedObjects = manager.GetManagedObjects();
             //find our adapter
             ObjectPath adapterPath = null;
@@ -158,7 +180,7 @@ namespace Mono.BlueZ.Console
                 System.Console.WriteLine("Checking " + obj);
                 if (managedObjects[obj].ContainsKey(typeof(LEAdvertisingManager1).DBusInterfaceName()))
                 {
-                    System.Console.WriteLine("Adapter found at" + obj + " that supports LE");
+                    System.Console.WriteLine("Adapter found at " + obj + " that supports LE");
                     adapterPath = obj;
                     break;
                 }
@@ -169,9 +191,9 @@ namespace Mono.BlueZ.Console
 
         private T GetObject<T>(string busName, ObjectPath path)
         {
-            if (system != null)
+            if (busConnection.System != null)
             {
-                var obj = system.GetObject<T>(busName, path);
+                var obj = busConnection.System.GetObject<T>(busName, path);
 
                 if (obj == null)
                 {
@@ -183,17 +205,6 @@ namespace Mono.BlueZ.Console
 
             System.Console.WriteLine("System is NULL");
             return default(T);
-        }
-
-        private void DeviceDisconnected(ObjectPath disconnectedDevicePath)
-        {
-            // Start Advertising again.
-            StartAdvertising();
-        }
-
-        private void DeviceConnected()
-        {
-            StopAdvertising();
         }
     }
 }
