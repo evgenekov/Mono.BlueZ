@@ -179,7 +179,7 @@ namespace Mono.BlueZ.Console
                             deviceConnected = string.Empty;
                             StopAdvertising();
                             StartAdvertising();
-                            System.Console.WriteLine("Device disconnected " + p.);
+                            System.Console.WriteLine("Device disconnected " + p);
                         }
                     }
 
