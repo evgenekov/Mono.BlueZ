@@ -17,6 +17,7 @@ namespace Mono.BlueZ.Console
         private LEAdvertisement1 advertisement;
         private DBusConnection busConnection;
         private string deviceConnected;
+        private bool isAdvertisementRegistred;
 
         public GattServer()
         {
@@ -51,7 +52,7 @@ namespace Mono.BlueZ.Console
 
                 gattManager = GetObject<GattManager1>(SERVICE, adapterFoundPath);
                 advertisementManager = GetObject<LEAdvertisingManager1>(SERVICE, adapterFoundPath);
-                                  
+
                 // Start advertising
                 StartAdvertising();
 
@@ -68,7 +69,7 @@ namespace Mono.BlueZ.Console
             {
                 if (gattManager != null)
                 {
-                    gattManager.UnregisterApplication(applicationPath);    
+                    gattManager.UnregisterApplication(applicationPath);
                 }
 
                 StopAdvertising();
@@ -77,6 +78,11 @@ namespace Mono.BlueZ.Console
 
         private void StartAdvertising()
         {
+            if (isAdvertisementRegistred)
+            {
+                return;
+            }
+
             var adapter_properties = GetObject<Adapter1>(SERVICE, adapterFoundPath);
             adapter_properties.Powered = true;
 
@@ -84,7 +90,16 @@ namespace Mono.BlueZ.Console
             advertisementPath = (advertisement as Advertisement).GetPath();
             var options = new Dictionary<string, object>();
 
-            advertisementManager.RegisterAdvertisement(advertisementPath, options);
+            try
+            {
+                advertisementManager.RegisterAdvertisement(advertisementPath, options);
+                isAdvertisementRegistred = true;
+            }
+            catch (Exception e)
+            {
+                isAdvertisementRegistred = false;
+                System.Console.WriteLine("Couldn't register advertisement: " + e);
+            }
         }
 
         private void StartApplication(GattManager1 gattManager)
@@ -94,7 +109,7 @@ namespace Mono.BlueZ.Console
                 System.Console.WriteLine("Couldn't find Gatt manager.");
                 return;
             }
-           
+
             var application = new Application(busConnection.System);
             application.AddService(new Test.TestService(busConnection.System, 0));
 
@@ -105,17 +120,26 @@ namespace Mono.BlueZ.Console
 
         private void StopAdvertising()
         {
-            if (advertisement != null)
+            if (advertisementPath == null && !isAdvertisementRegistred)
             {
-                advertisement.Release();
+                return;
             }
 
-            if (advertisementPath != null)
+            try
             {
                 advertisementManager.UnregisterAdvertisement(advertisementPath);
-                advertisementPath = null;
-                advertisement = null;
             }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("Couldn't unregister advertissement: " + e);
+            }
+            finally
+            {
+                isAdvertisementRegistred = false;
+            }
+
+            advertisementPath = null;
+            advertisement = null;
         }
 
         private ObjectManager GetCopyObjectManager()
@@ -134,6 +158,7 @@ namespace Mono.BlueZ.Console
                 {
                     if (string.IsNullOrEmpty(deviceConnected))
                     {
+                    	// TODO change this condition to be more robust. We should save the object path with the device address.
                         if (p.ToString().Contains(adapterFoundPath.ToString()))
                         {
                             deviceConnected = p.ToString();
@@ -154,7 +179,7 @@ namespace Mono.BlueZ.Console
                             deviceConnected = string.Empty;
                             StopAdvertising();
                             StartAdvertising();
-                            System.Console.WriteLine("Device disconnected");
+                            System.Console.WriteLine("Device disconnected " + p.);
                         }
                     }
 
