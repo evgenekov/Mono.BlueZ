@@ -11,7 +11,7 @@ namespace Mono.BlueZ.Console.Communication
       private static readonly string[] flags = { "read" };
 
       private byte[] dataToDownload;
-      private const int mtuSize = 23;
+      private const int mtuSize = 512;
       private int lastIndex = 0;
 
       public DataCharacteristic(Bus bus, int index, ObjectPath service) : base(bus, index, dataUUID, flags, service)
@@ -34,10 +34,6 @@ namespace Mono.BlueZ.Console.Communication
          {
             var numberOfBytesRemaining = dataToDownload.Length - lastIndex;
             valueToReturn = new byte[numberOfBytesRemaining];
-         }
-         else
-         {
-            return new byte[0];
          }
 
          Buffer.BlockCopy(dataToDownload, lastIndex, valueToReturn, 0, valueToReturn.Length);
