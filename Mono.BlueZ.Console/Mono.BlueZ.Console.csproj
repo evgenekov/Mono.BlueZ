@@ -49,6 +49,7 @@
     <Compile Include="Test\TestCharacteristic.cs" />
     <Compile Include="Test\TestDescriptor.cs" />
     <Compile Include="Test\TestService.cs" />
+    <Compile Include="Communication\MtuCharacteristic.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

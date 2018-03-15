@@ -7,7 +7,6 @@ namespace Mono.BlueZ.Console.Communication
    public class CommandCharacteristic : Characteristic
    {
       private const string commandUUID = "12345678-1234-5678-0001-56789abcdef1";
-
       private static readonly string[] flags = { "write" };
 
       public CommandCharacteristic(Bus bus, int index, ObjectPath service) : base(bus, index, commandUUID, flags, service)
